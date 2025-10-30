@@ -1,0 +1,55 @@
+{
+  "name": "ai-codex-starter",
+  "version": "1.0.0",
+  "description": "Multi-profile OpenAI-compatible CLI launcher with secure credential management",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "ai-codex-starter": "./dist/cli.js",
+    "codex-start": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bluehawana/ai-codex-starter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/bluehawana/ai-codex-starter/issues"
+  },
+  "homepage": "https://github.com/bluehawana/ai-codex-starter#readme",
+  "keywords": [
+    "openai",
+    "chatgpt",
+    "codex",
+    "cli",
+    "ai",
+    "profile-manager",
+    "azure-openai",
+    "kimi",
+    "minimax",
+    "moonshot"
+  ],
+  "author": "bluehawana",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "inquirer": "^9.2.12",
+    "keytar": "^7.9.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  }
+}
