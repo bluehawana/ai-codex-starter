@@ -8,3 +8,21 @@ dist/
 *.tsbuildinfo
 coverage/
 ai-claude-start/
+
+# Local codex and claude configurations
+.codex/
+.claude/
+
+# Test files with credentials (should not be committed)
+test-*.js
+test-*.ps1
+test-*.bat
+test-*.json
+update-*-credential.js
+update-*-profile.js
+update-*-key.js
+store-*-credential.js
+check-*.js
+debug-*.js
+setup-*.txt
+*.sh

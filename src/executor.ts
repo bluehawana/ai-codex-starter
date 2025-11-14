@@ -21,7 +21,7 @@ export function sanitizeEnvironment(): Record<string, string> {
 
 /**
  * Prepare environment for a profile
- * Always use OPENAI_API_KEY for credentials
+ * Uses custom env key name if specified, otherwise defaults to OPENAI_API_KEY
  */
 export async function prepareEnvironment(
   profile: Profile,
@@ -29,11 +29,12 @@ export async function prepareEnvironment(
 ): Promise<Record<string, string>> {
   const env = sanitizeEnvironment();
 
-  // Always use OPENAI_API_KEY
-  env['OPENAI_API_KEY'] = credential;
+  // Use custom env key name if specified, otherwise default to OPENAI_API_KEY
+  const envKeyName = profile.envKeyName || 'OPENAI_API_KEY';
+  env[envKeyName] = credential;
 
-  // Set base URL if not default OpenAI
-  if (profile.baseUrl !== 'https://api.openai.com/v1') {
+  // Set base URL if not default OpenAI (only for OpenAI-compatible providers)
+  if (profile.baseUrl !== 'https://api.openai.com/v1' && envKeyName === 'OPENAI_API_KEY') {
     env['OPENAI_BASE_URL'] = profile.baseUrl;
   }
 
@@ -112,7 +113,12 @@ export async function executeWithProfile(
 
   // Determine command to run
   const cmdIndex = args.indexOf('--cmd');
-  const cmdBinary = process.env.CODEX_CMD || (cmdIndex >= 0 ? args[cmdIndex + 1] : 'codex');
+  let cmdBinary = process.env.CODEX_CMD || (cmdIndex >= 0 ? args[cmdIndex + 1] : 'codex');
+  
+  // On Windows, add .cmd extension if not already present and not a custom command
+  if (process.platform === 'win32' && cmdBinary === 'codex' && !cmdBinary.endsWith('.cmd')) {
+    cmdBinary = 'codex.cmd';
+  }
 
   // Filter out --cmd and its value from args
   let codexArgs = args;
@@ -120,9 +126,21 @@ export async function executeWithProfile(
     codexArgs = [...args.slice(0, cmdIndex), ...args.slice(cmdIndex + 2)];
   }
 
-  // Add --model parameter if profile has model configured and not already specified
-  if (targetProfile.model && !codexArgs.includes('--model')) {
-    codexArgs = ['--model', targetProfile.model, ...codexArgs];
+  // Add -c flags for model_provider and model if configured
+  // Use -c config overrides instead of --model flag for better compatibility
+  const configOverrides: string[] = [];
+  
+  if (targetProfile.modelProvider) {
+    configOverrides.push('-c', `model_provider=${targetProfile.modelProvider}`);
+  }
+  
+  if (targetProfile.model && !codexArgs.includes('--model') && !codexArgs.includes('-m')) {
+    configOverrides.push('-c', `model="${targetProfile.model}"`);
+  }
+  
+  // Insert config overrides at the beginning of args
+  if (configOverrides.length > 0) {
+    codexArgs = [...configOverrides, ...codexArgs];
   }
 
   console.log(
@@ -133,10 +151,25 @@ export async function executeWithProfile(
   }
 
   // Execute
-  const child = spawn(cmdBinary, codexArgs, {
+  // On Windows, use shell: true to properly resolve .cmd files
+  // When using shell, we need to properly quote arguments that contain spaces
+  let spawnArgs = codexArgs;
+  let useShell = process.platform === 'win32';
+  
+  if (useShell) {
+    // Quote arguments that contain spaces
+    spawnArgs = codexArgs.map(arg => {
+      if (arg.includes(' ') && !arg.startsWith('"')) {
+        return `"${arg}"`;
+      }
+      return arg;
+    });
+  }
+  
+  const child = spawn(cmdBinary, spawnArgs, {
     env,
     stdio: 'inherit',
-    shell: true
+    shell: useShell
   });
 
   child.on('exit', (code) => {

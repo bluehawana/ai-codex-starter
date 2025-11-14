@@ -52,9 +52,46 @@ export async function setupCommand(): Promise<void> {
     baseUrl = customAnswers.baseUrl;
     model = customAnswers.model || undefined;
   } else {
+    // Use preset as default, but allow editing
     const presetConfig = PRESETS[preset];
-    baseUrl = presetConfig.baseUrl;
-    model = presetConfig.model;
+    const { shouldEdit } = await inquirer.prompt<{ shouldEdit: boolean }>([
+      {
+        type: 'confirm',
+        name: 'shouldEdit',
+        message: `Use preset values (URL: ${presetConfig.baseUrl}, Model: ${presetConfig.model || 'none'})?`,
+        default: true
+      }
+    ]);
+
+    if (shouldEdit) {
+      baseUrl = presetConfig.baseUrl;
+      model = presetConfig.model;
+    } else {
+      const editAnswers = await inquirer.prompt<{ baseUrl: string; model: string }>([
+        {
+          type: 'input',
+          name: 'baseUrl',
+          message: 'Enter API base URL:',
+          default: presetConfig.baseUrl,
+          validate: (input) => {
+            try {
+              new URL(input);
+              return true;
+            } catch {
+              return 'Please enter a valid URL';
+            }
+          }
+        },
+        {
+          type: 'input',
+          name: 'model',
+          message: 'Enter model name (optional):',
+          default: presetConfig.model || ''
+        }
+      ]);
+      baseUrl = editAnswers.baseUrl;
+      model = editAnswers.model || undefined;
+    }
   }
 
   const config = readConfig();
