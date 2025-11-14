@@ -16,7 +16,8 @@
   - Define SERVICE_NAME constant for keychain identification
   - _Requirements: 1.1, 1.2_
 
-- [ ] 3. Implement storage layer
+- [x] 3. Implement storage layer
+
 - [x] 3.1 Create configuration management functions
 
   - Write readConfig() function to read from ~/.ai-codex-profiles.json
@@ -155,7 +156,7 @@
   - List all features implemented
   - _Requirements: 10.2_
 
-- [-] 8. Initialize Git repository and push to GitHub
+- [x] 8. Initialize Git repository and push to GitHub
 
   - Run git init in project root
   - Add all files to git
@@ -164,7 +165,7 @@
   - Push to main branch
   - _Requirements: 10.1, 10.3, 10.5_
 
-- [-] 9. Build and test the package
+- [x] 9. Build and test the package
 
   - Run npm install to install dependencies
   - Run npm run build to compile TypeScript

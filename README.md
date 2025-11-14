@@ -111,13 +111,14 @@ ai-codex-starter doctor
 
 ## Profile Configuration
 
-A profile consists of 3-4 fields:
+A profile consists of 3-5 fields:
 
 ```typescript
 {
   name: string;           // Unique identifier
   baseUrl: string;        // API base URL
   model?: string;         // Optional model name
+  envKeyName?: string;    // Optional custom env variable (e.g., 'MINIMAX_API_KEY')
   apiKey: string;         // API key (stored securely)
 }
 ```

@@ -33,7 +33,8 @@ export async function prepareEnvironment(
   const envKeyName = profile.envKeyName || 'OPENAI_API_KEY';
   env[envKeyName] = credential;
 
-  // Set base URL if not default OpenAI (only for OpenAI-compatible providers)
+  // Always set OPENAI_BASE_URL for non-OpenAI providers
+  // This ensures codex doesn't fall back to OpenAI's API
   if (profile.baseUrl !== 'https://api.openai.com/v1' && envKeyName === 'OPENAI_API_KEY') {
     env['OPENAI_BASE_URL'] = profile.baseUrl;
   }
